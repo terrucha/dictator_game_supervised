@@ -469,6 +469,7 @@ class Decision(Page):
                 # Clear the alert message if no timeout occurred
                 self.participant.vars['alert_message'] = None
                 self.player.random_decisions = False
+            self.player.delegate_decision_optional = False 
             # Update decisions for the current round
 
 
@@ -477,11 +478,13 @@ class Decision(Page):
             self.player.allocation = self.player.get_agent_decision_mandatory(display_round)
             self.participant.vars['alert_message'] = ""
             self.player.random_decisions = True
+            self.player.delegate_decision_optional = False 
 
         elif current_part == 3 and self.player.delegate_decision_optional:  # Optional delegation
             self.player.allocation = self.player.get_agent_decision_optional(display_round)
             self.participant.vars['alert_message'] = ""
             self.player.random_decisions = True
+            self.player.delegate_decision_optional = True
         
         elif current_part == 3 and not self.player.delegate_decision_optional:  # Optional delegation
             #self.player.allocation = self.player.get_agent_decision_optional(display_round)
@@ -497,7 +500,7 @@ class Decision(Page):
                 # Clear the alert message if no timeout occurred
                 self.participant.vars['alert_message'] = ''
                 self.player.random_decisions = False
-            
+            self.player.delegate_decision_optional = False 
 
 
 
@@ -542,6 +545,12 @@ class Results(Page):
         import json
 
         current_part = Constants.get_part(self.round_number)
+        current_part = Constants.get_part(self.round_number)
+        if current_part  == 2 or (current_part == 3 and self.player.delegate_decision_optional):
+            is_delegation=False
+        else: 
+            is_delegation=  self.player.field_maybe_none('delegate_decision_optional')
+        #decisions = json.loads(self.player.random_decisions)
         #decisions = json.loads(self.player.random_decisions)
 
         # Collect results for each round in the current part
@@ -555,7 +564,7 @@ class Results(Page):
                 rounds_data.append({
                     "current_part": current_part,
                     "delegation" : player.field_maybe_none('delegate_decision_optional'),
-                    "round": round_number,
+                    "round": round_number if current_part ==1 else round_number - 10 if current_part == 2 else round_number - 20,
                     "decision": round_result.field_maybe_none('random_decisions'),
                     "id_in_group": player.id_in_group,
                     "kept": 100 - (round_result.field_maybe_none('allocation') or 0),
@@ -566,6 +575,7 @@ class Results(Page):
         return {
             'current_part': current_part,
             'rounds_data': rounds_data,
+            'is_delegation' : is_delegation
         }
 
 # -------------------------
@@ -616,6 +626,8 @@ class Debriefing(Page):
             'agent_allocation_chosen': agent_allocation_chosen,
             'random_payoff_part': random_payoff_part,
             'total_kept' : total_kept,
+            'payoff_cents' : int(round(total_kept/10,0)),
+
             'total_allocated' : total_allocated
                }
     

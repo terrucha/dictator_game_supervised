@@ -4,12 +4,12 @@
 <div class="main-container">
     <!-- Left Side: Dataset Tables -->
     <div class="dataset-container">
-        <span>Here are 5 samples based on Supervised Learning. Click a table to generate allocations:</span>
+        <span>Choose one of the datasets below to train your AI agent’s behavior. After choosing a table and clicking “Generate” you can check your AI agent’s behavior on the table on the right before confirming it.</span>
         
         <div class="dataset-tables">
             {% for dataset in datasets %}
                 <div class="dataset-box">
-                    <span>Dataset {{ dataset.dataset_num }} || Mean: {{ dataset.mean_value }}</span>
+                    
                     <table class="styled-table dataset-table" id="dataset_{{ dataset.dataset_num }}" onclick="selectTable({{ dataset.dataset_num }}, {{ dataset.mean_value }})">
                         <thead>
                             <tr>
@@ -37,7 +37,7 @@
 
     <!-- Right Side: Results Table -->
     <div class="results-container">
-        <h3 class="main-title">Results</h3>
+        <h3 class="main-title">AI Agent Behavior</h3>
         <table id="allocation-table" class="styled-table">
             <thead>
                 <tr>
@@ -49,7 +49,7 @@
             <tbody>
                 {% for i in range(1, 11) %}
                 <tr>
-                    <td>Round {{ i }}</td>
+                    <td>{{ i }}</td>
                     <td>-</td>
                     <td>-</td>
                 </tr>
@@ -60,7 +60,7 @@
             <button class="modern-btn2" onclick="generateAllocations()">Generate</button>
         </div>
         <form method="post">
-            <button type="submit" class="modern-btn">Confirm Allocations</button>
+            <button type="submit" class="modern-btn">Confirm</button>
         </form>
     </div>
 </div>
@@ -143,6 +143,7 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 15px;
     max-width: 600px;
+    padding-top: 50px;
 }
 
 /* Move last two tables to the second row */
