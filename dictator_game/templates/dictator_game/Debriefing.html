@@ -33,6 +33,15 @@
                 {% endfor %}
                 </tbody>
             </table>
+                <br>
+                <div>{% if part == 1 %}
+                    <h5 class="table-title">Total Kept: </h5>  <p>{{totals_by_1}} ECoins</p>
+                {% elif part == 2 %}
+                    <h5 class="table-title">Total Kept: </h5>  <p>{{totals_by_2}} ECoins</p>
+                {% elif part == 3 %}
+                    <h5 class="table-title">Total Kept: </h5>  <p>{{totals_by_3}} ECoins</p>
+                {% endif %}
+                </div>
         </div>
         {% endfor %}
     </div>

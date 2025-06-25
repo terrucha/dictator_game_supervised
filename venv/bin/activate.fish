@@ -30,7 +30,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/morbifakhar/Documents/Hiwi_NIls_Kobis/Ines Project/pilot-dictator-game-main/venv"
+set -gx VIRTUAL_ENV "/Users/morbifakhar/Documents/Hiwi_NIls_Kobis/Ines Project/Github Clones/dictator_game_supervised/venv"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH
