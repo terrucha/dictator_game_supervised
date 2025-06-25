@@ -1,107 +1,11 @@
 from otree.api import *
-from .models import Constants, initialize_assistant,generate_numbers
+from .models import Constants,generate_numbers
 import json
 import re
 import numpy as np
 import settings
 
-class ChatGPTPage(Page):
-
-    """ Page where users interact with ChatGPT in real-time """
-    form_model = 'player'  # ✅ Required for form submission
-    form_fields = []
-
-
-    def is_displayed(self):
-        """ Ensure ChatGPTPage runs for each round in the part """
-        current_part = Constants.get_part(self.round_number)
-        display_round = (self.round_number - 1) % Constants.rounds_per_part + 1  # ✅ Get round within part
-
-        # ✅ Show ChatGPTPage for each round in Part 2 or Part 3 (if delegation is chosen)
-        return (current_part == 2 or (current_part == 3 and self.player.delegate_decision_optional)) and (display_round -1) % Constants.rounds_per_part ==0
-    def vars_for_template(self):
-        current_part = Constants.get_part(self.round_number)
-        return {
-            'current_part' : current_part,
-         }
-        
-    def before_next_page(self):
-        chatgpt_final_response=self.get_final_assistant_response()
-        #c$#"
-        self.save_allocations_to_future_rounds(chatgpt_final_response)
-        print('Saved Allocations from AI Assistant')
-        
-    def get_final_assistant_response(self):
-
-        
-        conversation = json.loads(self.player.conversation_history)
-
-        # Regex pattern to match exactly 10 comma-separated numbers
-        pattern = r'^(\d{1,3},){9}\d{1,3}$'
-        last_assistant_message = next(
-                (msg["content"] for msg in reversed(conversation) if msg["role"] == "assistant" and re.match(pattern, msg["content"])), None )
-       
-        if last_assistant_message != None: 
-            return last_assistant_message
-        else: 
-            print('No pattern match GPT message found, Sending Sample')
-            return "10,10,10,10,10,10,10,10,10,10"
-
-    def save_allocations_to_future_rounds(self, chatgpt_final_response):
-    
-        allocation_values = chatgpt_final_response.split(',')  # ✅ Split ChatGPT response into list
-        print('Last GPT Response: ',allocation_values)
-        try:
-            # ✅ Ensure we have exactly 10 allocations (Rounds 10 to 20)
-            if len(allocation_values) < 10:
-                print("⚠️ ChatGPT did not return 10 allocations, skipping storage.")
-                return
-
-            round_number=self.round_number
-            print('Ongoing Round: ',round_number)
-            for i in range(1,11):  # ✅ Loop for 10 rounds (rounds 10-20)
-                # ✅ Fetch player object for the future round
-                future_player = self.player.in_round(round_number)
-                self.round_number=round_number
-
-                # ✅ Store allocation in the correct round
-                future_player.allocation = int(allocation_values[i-1].strip())
-                print(f"✅ Saved allocation {future_player.allocation} for Round {round_number}")
-                round_number = round_number + 1
-
-        except (ValueError, IndexError):
-            print("⚠️ Error: ChatGPT response is not formatted correctly, skipping.")
-
-    def live_method(self, data):
-        chatbot_assistant=initialize_assistant(self)
-
-        if self.assistant_id:
-
-            """ Handles real-time chat interaction via WebSockets """
-            self.participant.vars['alert_message']="" #test alert removal
-            user_message = data['message']  # Get user input
-            print("recieved user message")
-            # Load existing conversation history
-            #conversation = json.loads(self.conversation_history)
-            conversation = []
-            # Append user's message
-            conversation.append({"role": "user", "content": user_message})
-
-            # Get AI response
-            print("Sending user message to CHATGPT")
-            chatgpt_response = chatbot_assistant.send_message(user_message)
-            print('ChatGPT response:',chatgpt_response)
-            allocation_values = chatgpt_response.split(',')
-
-            conversation.append( {"role": "assistant", "content": chatgpt_response})
-            # Save conversation history
-            self.conversation_history = json.dumps(conversation)
-
-            # Send response back to the frontend
-            #send_rec_msg={self.id_in_group: {"message": user_message, "response": chatgpt_response}}
-            #print('Sending back the msg to HTML: ',chatgpt_response)
-            return {self.id_in_group: {"response": chatgpt_response}}
-    
+   
 class SupervisedLearning(Page):
     form_model = 'player'  # ✅ Required for form submission
     form_fields = []
@@ -229,103 +133,9 @@ class SupervisedLearning(Page):
             print('Sending back the msg to HTML:', allocations_str)
             return {self.id_in_group: {"response": allocations_str}}   
 
-
-# --------- Here a player chooses the slider in part 2 and 3 (if delegation is chosen) ------------   
-class GoalOriented(Page): 
-
-    """ Page where users interact with ChatGPT in real-time """
-    form_model = 'player'  # ✅ Required for form submission
-    form_fields = []
-
-
-    def is_displayed(self):
-        """ Ensure GoalOriented runs for each round in the part """
-        current_part = Constants.get_part(self.round_number)
-        display_round = (self.round_number - 1) % Constants.rounds_per_part + 1  # ✅ Get round within part
-
-        # ✅ Show ChatGPTPage for each round in Part 2 or Part 3 (if delegation is chosen)
-        return (current_part == 2 or (current_part == 3 and self.player.delegate_decision_optional)) and (display_round -1) % Constants.rounds_per_part ==0
-    
-    def vars_for_template(self):
-        current_part = Constants.get_part(self.round_number)
-        return {
-            'current_part' : current_part,
-         }
-        
-    def before_next_page(self):
-        final_response=self.get_final_response()
-        self.save_allocations_to_future_rounds(final_response)
-        print('Saved Allocations from AI Assistant')
-        
-    def get_final_response(self):
-
-        
-        conversation = json.loads(self.player.orientation_history)
-        print('Conversation:',conversation)
-
-        index=str(self.player.sample_cnt-1)
-        last_key = list(conversation.keys())[-1] 
-        last_goal_message = conversation[last_key]
-       
-        if last_goal_message != None:
-            print('Last goal Message: ',last_goal_message) 
-            return last_goal_message
-        else: 
-            print('Error found, Sending Sample')
-            return "10,10,10,10,10,10,10,10,10,10"
-
-    def save_allocations_to_future_rounds(self, final_goal_response):
-    
-        allocation_values = list(map(int,final_goal_response['allocations'].split(',')))
-        mean_value_selected = final_goal_response['slider_value']
-        print('Last Allocation: ',allocation_values)
-        try:
-            # ✅ Ensure we have exactly 10 allocations (Rounds 10 to 20)
-            if len(allocation_values) < 10:
-                print("⚠️ Live method did not return 10 allocations, skipping storage.")
-                return
-
-            round_number=self.round_number
-            print('Ongoing Round: ',round_number)
-            for i in range(1,11):  # ✅ Loop for 10 rounds (rounds 10-20)
-                # ✅ Fetch player object for the future round
-                future_player = self.player.in_round(round_number)
-                self.round_number=round_number
-
-                # ✅ Store allocation in the correct round
-                future_player.allocation = allocation_values[i-1]
-                print(f"✅ Saved allocation {future_player.allocation} for Round {round_number}")
-                round_number = round_number + 1
-
-        except (ValueError, IndexError):
-            print("⚠️ Error:  response is not formatted correctly, skipping.")
-    
-
-    
-    def live_method(self, data):
-        print('In live method')
-        if 'slider_value' in data:
-            print('Received slider value:', float(data['slider_value']))
-            
-            allocations = generate_numbers(float(data['slider_value']),'goal')
-            allocations_str = ','.join(map(str, allocations['allocations']))
-            
-            # Ensure orientation_history is a valid dictionary
-            if not self.orientation_history:  # If it's empty, initialize it
-                history = {}
-            else:
-                history = json.loads(self.orientation_history)  # Convert from string to dict
-            
-            history[self.sample_cnt] = {'slider_value': float(data['slider_value']) , 'allocations':  allocations_str } # Store values using sample_cnt as key
-            
-            self.orientation_history = json.dumps(history)  # Convert back to string for storage
-            self.sample_cnt += 1  # Increment counter
-
-            print(f'Sample History: {self.orientation_history}')
-            print('Sending back the msg to HTML:', allocations_str)
-            return {self.id_in_group: {"response": allocations_str}}   
-
 class InformedConsent(Page):
+    form_model = 'player'
+    form_fields = ['prolific_id']
     def is_displayed(self):
         return self.round_number == 1  # Show only once at the beginning
 
@@ -352,9 +162,7 @@ class ComprehensionTest(Page):
             'q5': 'a',
             'q6': 'a',
             'q7': 'b',
-            'q8': 'b',
-            'q9': 'a',
-            'q10': 'b',
+            'q8': 'a',
         }
 
         incorrect = [
@@ -365,24 +173,20 @@ class ComprehensionTest(Page):
         if incorrect:
             self.player.comprehension_attempts += 1
 
-            if self.player.comprehension_attempts >= 3:
+            if self.player.comprehension_attempts == 1:
+                 return f"You have failed questions: {', '.join(incorrect)}. You now only have 2 attempts"
+            
+            elif self.player.comprehension_attempts == 2:
+                 return f"You have failed questions: {', '.join(incorrect)}. You now only have 1 attempt"
+            
+            elif self.player.comprehension_attempts == 1:
+                 return f"You have failed questions: {', '.join(incorrect)}. You now only have last attempt"
+            else:
                 self.player.is_excluded = True
-
-
-            # elif self.player.comprehension_attempts == 2:
-            #     return f"You answered the following question(s) incorrectly or left them blank: {', '.join(incorrect)}. This is your second failure. One more failure and you will be excluded."
-            #
-            # elif self.player.comprehension_attempts == 1:
-            #     return f"You answered the following question(s) incorrectly or left them blank: {', '.join(incorrect)}. Please review the instructions and try again."
-
-            self.player.incorrect_answers = ', '.join(incorrect)  # Log incorrect answers
-            return None  # Allow participant to proceed without being excluded
-
 
 class FailedTest(Page):
     def is_displayed(self):
-        #return self.player.is_excluded
-        return False
+        return self.player.is_excluded
 
 
 # -------------------------
@@ -414,7 +218,6 @@ class Instructions(Page):
 class Decision(Page):
     form_model = 'player'
     form_fields = ['allocation']
-    timeout_seconds = 20
 
  
 
@@ -453,23 +256,20 @@ class Decision(Page):
         import json
         import random
 
- 
+
+        #decisions = json.loads(self.player.random_decisions)
+        #print(f"[DEBUG] Existing random_decisions: {decisions}")
+
+        # Get current part and display round
         current_part = Constants.get_part(self.round_number)
         display_round = (self.round_number - 1) % Constants.rounds_per_part + 1
 
-        if current_part == 1  :  # Part 1 logic or Part 3 with manual with manual decisions and timer
-            if self.timeout_happened or self.player.allocation is None:
-                # Assign random allocation if timer expires
-                self.player.allocation = random.randint(0, 100)
-                self.participant.vars['alert_message'] = (
-                    f"You did not make a choice, so {self.player.allocation} was chosen for you. "
-                )
-                self.player.random_decisions = True
-            else:
-                # Clear the alert message if no timeout occurred
+        if current_part == 1 or (current_part == 3 and not self.player.delegate_decision_optional)  :  # Part 1 logic or Part 3 with manual with manual decisions and timer
+  
                 self.participant.vars['alert_message'] = None
                 self.player.random_decisions = False
-            self.player.delegate_decision_optional = False 
+                self.player.delegate_decision_optional = False 
+
             # Update decisions for the current round
 
 
@@ -483,29 +283,19 @@ class Decision(Page):
         elif current_part == 3 and self.player.delegate_decision_optional:  # Optional delegation
             self.player.allocation = self.player.get_agent_decision_optional(display_round)
             self.participant.vars['alert_message'] = ""
-            self.player.random_decisions = True
+            self.player.random_decisions = False
             self.player.delegate_decision_optional = True
-        
-        elif current_part == 3 and not self.player.delegate_decision_optional:  # Optional delegation
-            #self.player.allocation = self.player.get_agent_decision_optional(display_round)
-            if self.timeout_happened or self.player.allocation is None:
-                # Assign random allocation if timer expires
-                self.player.allocation = random.randint(0, 100)
-                self.participant.vars['alert_message'] = (
-                    f"You did not make a choice, so {self.player.allocation} was chosen for you. "
-                )
-                self.player.random_decisions = True
 
-            else:
-                # Clear the alert message if no timeout occurred
-                self.participant.vars['alert_message'] = ''
-                self.player.random_decisions = False
-            self.player.delegate_decision_optional = False 
+        # elif current_part == 3 and not self.player.delegate_decision_optional:  # Manual decision
+
+        #     #self.player.allocation = self.player.get_agent_decision_optional(display_round)
+        #     self.player.random_decisions = False
+        #     self.player.delegate_decision_optional = False
+        #     self.player.allocation = self.player.get_agent_decision_optional(display_round)
 
 
 
         print(f"round:{self.round_number}  self.player.allocation: {self.player.allocation}")
-
 
 # -------------------------
 #  Delegation Decision
@@ -581,7 +371,6 @@ class Results(Page):
 # -------------------------
 #  Debriefing
 # -------------------------
-
 class Debriefing(Page):
     def is_displayed(self):
         return  self.round_number == Constants.num_rounds
@@ -589,9 +378,13 @@ class Debriefing(Page):
 
     def vars_for_template(self):
         import json
-
+        import random
 
         results_by_part = {}
+        totals_by_part= {}
+
+        round_number=self.round_number
+        random_payoff_part=random.randint(1,3)
 
         # Loop through parts (1, 2, 3)
         for part in range(1, 4):
@@ -609,6 +402,12 @@ class Debriefing(Page):
                 })
 
             results_by_part[part] = part_data
+            total_kept = sum(item["kept"] for item in part_data)
+            total_allocated = sum(item["allocated"] for item in part_data)
+            totals_by_part[part] = {
+            "total_kept": total_kept,
+        }
+
 
         # Check if agent allocation was chosen in part 3
         agent_allocation_chosen = self.player.field_maybe_none('delegate_decision_optional')
@@ -618,16 +417,23 @@ class Debriefing(Page):
         else: 
             random_payoff_part=self.player.random_payoff_part
 
+        
+
         payoff_data=results_by_part[self.player.random_payoff_part]
         total_kept,total_allocated=self.calculate_total_payoff(payoff_data)
 
+
         return {
             'results_by_part': results_by_part,
+            'totals_by_part': totals_by_part,
+
+            'totals_by_1': totals_by_part[1]['total_kept'],
+            'totals_by_2': totals_by_part[2]['total_kept'],
+            'totals_by_3': totals_by_part[3]['total_kept'],
             'agent_allocation_chosen': agent_allocation_chosen,
             'random_payoff_part': random_payoff_part,
             'total_kept' : total_kept,
-            'payoff_cents' : int(round(total_kept/10,0)),
-
+            'payoff_cents' : int(round(total_kept/10,1)),
             'total_allocated' : total_allocated
                }
     
@@ -649,8 +455,6 @@ class Debriefing(Page):
         return total_kept,total_allocated
 
 
-
-
 # -------------------------
 #  Page Sequence
 # -------------------------
@@ -663,7 +467,6 @@ page_sequence = [
     FailedTest,             # If excluded after failing comprehension test
     Instructions,           # Once at the start of each part
     DelegationDecision,     # At the start of Part 3 to choose delegation
-    #GoalOriented,            # ChatGPTPage for Part 2 or optional delegation in Part 3
     SupervisedLearning,     # ChatGPTPage for Part 2 or optional delegation in Part 3
     Decision,               # Decision page for Part 1 and manual decisions in Part 3
     Results,                # Reusable for all parts

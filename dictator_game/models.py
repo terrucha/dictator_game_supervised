@@ -1,5 +1,4 @@
 from otree.api import *
-from dictator_game.chatgptassistant import ChatGPTAssistant
 import numpy as np
 import settings
 
@@ -59,7 +58,7 @@ class Group(BaseGroup):
     pass
 
 class Player(BasePlayer):
-
+    prolific_id = models.StringField()
     final_allocations = models.LongStringField()
     conversation_history=models.LongStringField(initial='[]') 
     orientation_history=models.LongStringField(initial='{}')

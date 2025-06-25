@@ -9,21 +9,24 @@
         <div class="dataset-tables">
             {% for dataset in datasets %}
                 <div class="dataset-box">
-                    
+                    <p class="intro-text">Dataset: {{dataset.dataset_num}}</p>
                     <table class="styled-table dataset-table" id="dataset_{{ dataset.dataset_num }}" onclick="selectTable({{ dataset.dataset_num }}, {{ dataset.mean_value }})">
                         <thead>
                             <tr>
                                 <th>Round</th>
-                                <th>Kept</th>
                                 <th>Allocated</th>
+                                <th>Kept</th>
+                                
+
                             </tr>
                         </thead>
                         <tbody>
                             {% for row in dataset.allocations %}
                                 <tr>
                                     <td>{{ row.round_num }}</td>
-                                    <td>{{ row.kept }}</td>
                                     <td>{{ row.allocate }}</td>
+                                    <td>{{ row.kept }}</td>
+
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -59,9 +62,9 @@
         <div class="generate-container">
             <button class="modern-btn2" onclick="generateAllocations()">Generate</button>
         </div>
-        <form method="post">
-            <button type="submit" class="modern-btn">Confirm</button>
-        </form>
+   <form method="post">
+                    <button type="submit" class="modern-btn" id="confirm-btn" style="background-color: #009933; display: none;">Confirm</button>
+    </form>
     </div>
 </div>
 
@@ -95,7 +98,23 @@ function generateAllocations() {
 }
 
 function liveRecv(data) {
-    console.log('Received Data:', data);
+        console.log('Received Data:', data);
+        const pattern = /^(\d{1,3},\s*){9}\d{1,3}$/;
+        const confirmBtn = document.getElementById("confirm-btn");
+
+
+        if (pattern.test(data.response))
+        {
+            if (confirmBtn) {
+            confirmBtn.style.display = "block"; // or "block" if you prefer full-width
+                            }
+
+        }
+
+        else {
+
+            confirmBtn.style.display = "none"
+        }
     let allocationTable = document.getElementById("allocation-table").getElementsByTagName('tbody')[0];
 
     if (data.response) {
@@ -229,7 +248,7 @@ body {
     padding: 12px 20px;
     font-size: 18px;
     color: #ffffff;
-    background-color: #3f963b;
+    background-color: #0056b3;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -277,6 +296,14 @@ body {
     .styled-table {
         font-size: 14px;
     }
+
+    .intro-text {
+    font-size: 16px;
+    font-weight: bolder;
+    color: #000000;
+    line-height: 1.6;
+    margin-top: 20px;
+}
 }
 </style>
 

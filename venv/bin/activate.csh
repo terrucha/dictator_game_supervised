@@ -8,7 +8,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV "/Users/morbifakhar/Documents/Hiwi_NIls_Kobis/Ines Project/pilot-dictator-game-main/venv"
+setenv VIRTUAL_ENV "/Users/morbifakhar/Documents/Hiwi_NIls_Kobis/Ines Project/Github Clones/dictator_game_supervised/venv"
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/bin:$PATH"
