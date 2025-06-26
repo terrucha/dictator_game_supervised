@@ -45,7 +45,8 @@ class SupervisedLearning(Page):
         
             self.supervised_history=json.dumps(json_serializable_dataset)
         
-        return {'datasets': formatted_datasets}
+        return {'datasets': formatted_datasets,
+                'current_part': current_part}
 
 
 
