@@ -2,14 +2,6 @@ from otree.api import *
 import numpy as np
 import settings
 
-
-def initialize_assistant(self): 
-        
-        chatbot_assistant=ChatGPTAssistant()
-        self.assistant_id=chatbot_assistant.assistant_id  
-
-        return chatbot_assistant
-
 #returns a list of 10 random numbers, calculated using normal distribution with a mean coming from the slider 
 def generate_numbers(mean,case):
     
@@ -74,6 +66,56 @@ class Player(BasePlayer):
         max=100,
         label="How much would you like to allocate to the other participant?",
         blank=True
+    )
+    gender = models.StringField(
+        choices=[
+            ('male',        'Male'),
+            ('female',      'Female'),
+            ('nonbinary',   'Non-binary'),
+            ('nosay',       'Prefer not to say'),
+        ],
+        label="How do you describe yourself?",
+        widget=widgets.RadioSelect 
+    )
+
+    age = models.IntegerField(
+        min=18, max=100,
+        label="How old are you?",
+    )
+
+    occupation = models.StringField(
+        max_length=100,
+        label="What is your current main occupation?",
+    )
+
+    ai_use = models.StringField(
+        choices=[
+            ('never',       'Never'),
+            ('monthly',     'A few times a month'),
+            ('weekly',      'A few times a week'),
+            ('daily',       'A few times a day'),
+            ('constant',    'All the time'),
+        ],
+        label="How often do you interact with AI agents (e.g., ChatGPT)?",
+        widget=widgets.RadioSelect 
+    )
+
+    task_difficulty = models.StringField(
+        choices=[
+            ('very_diff',   'Very difficult to understand'),
+            ('diff',        'Difficult to understand'),
+            ('neutral',     'Neutral'),
+            ('easy',        'Easy to understand'),
+            ('very_easy',   'Very easy to understand'),
+        ],
+        label="How would you rate the clarity of the experimental task?",
+        widget=widgets.RadioSelect 
+    )
+
+    feedback = models.LongStringField(
+        blank=True,                # optional
+        max_length=1000,
+        label="Suggestions / comments for the researchers (optional)",
     )
 
     random_payoff_part=models.IntegerField( blank=True, min=1, max=3 )
