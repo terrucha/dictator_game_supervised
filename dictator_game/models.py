@@ -180,17 +180,17 @@ class Player(BasePlayer):
         blank=True
     )
 
-    # # Agent allocations for Part 2 (mandatory delegation)
-    # agent_allocation_mandatory_round_1 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_2 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_3 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_4 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_5 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_6 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_7 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_8 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_9 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_10 = models.IntegerField(min=0, max=100, blank=True)
+    # Agent allocations for Part 2 (mandatory delegation)
+    agent_allocation_mandatory_round_1 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_2 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_3 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_4 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_5 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_6 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_7 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_8 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_9 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_mandatory_round_10 = models.IntegerField(min=0, max=100, blank=True)
 
     # # Track whether the participant chooses to delegate in Part 3
     delegate_decision_optional = models.BooleanField(
@@ -199,16 +199,16 @@ class Player(BasePlayer):
     ) 
 
     # # Agent allocations for Part 3 (optional delegation)
-    # agent_allocation_optional_round_1 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_2 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_3 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_4 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_5 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_6 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_7 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_8 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_9 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_10 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_1 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_2 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_3 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_4 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_5 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_6 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_7 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_8 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_9 = models.IntegerField(min=0, max=100, blank=True)
+    agent_allocation_optional_round_10 = models.IntegerField(min=0, max=100, blank=True)
 
     def get_agent_decision_mandatory(self, round_number):
         """Retrieve the agent's allocation for a given round in Part 2."""
